@@ -203,7 +203,19 @@ namespace ILRuntime.Runtime.Debugger
                 var addr = *(long*)&arg->Value;
                 arg = (StackObject*)addr;
             }
-            ILTypeInstance instance = arg->ObjectType != ObjectTypes.Null ? intepreter.Stack.ManagedStack[arg->Value] as ILTypeInstance : null;
+            ILTypeInstance instance = null;
+            if (arg->ObjectType != ObjectTypes.Null)
+            {
+                var o = intepreter.Stack.ManagedStack[arg->Value];
+                if (o is ILTypeInstance inst)
+                {
+                    instance = inst;
+                }
+                else if (o is CrossBindingAdaptorType csAdapter)
+                {
+                    instance = csAdapter.ILInstance;
+                }
+            }
             if (instance == null)
                 return "null";
             var fields = instance.Type.TypeDefinition.Fields;
